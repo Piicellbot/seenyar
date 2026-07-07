@@ -15,9 +15,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     
     <style>
-        /* ============================================
-           RESET & BASE
-        ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -54,9 +51,6 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(45deg, #2563eb, #7c3aed); border-radius: 10px; }
 
-        /* ============================================
-           PRELOADER
-        ============================================ */
         .preloader {
             position: fixed;
             top: 0;
@@ -114,9 +108,6 @@
             transition: width 0.5s ease;
         }
 
-        /* ============================================
-           HEADER
-        ============================================ */
         .header {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
@@ -3661,7 +3652,7 @@
     </div>
 
     <!-- ============================================
-    BOTTOM NAV
+    BOTTOM NAV - کیف پول (چپ) | مثبت (وسط) | خانه (راست) | مدیریت (چهارم)
     ============================================ -->
     <nav class="bottom-nav">
         <button class="nav-item" data-page="page-wallet" onclick="navigateTo('wallet')">
@@ -3672,6 +3663,10 @@
         </button>
         <button class="nav-item active" data-page="page-home" onclick="navigateTo('home')">
             <i class="fas fa-home"></i><span>خانه</span>
+        </button>
+        <!-- ===== دکمه مدیریت - فقط برای ادمین ===== -->
+        <button class="nav-item" id="adminNavBtn" data-page="page-admin" onclick="navigateTo('admin')" style="display:none;">
+            <i class="fas fa-crown" style="color: #fbbf24;"></i><span>مدیریت</span>
         </button>
     </nav>
 
@@ -3991,7 +3986,7 @@
         let charges = getData('charges');
 
         // ============================================================
-        //  INIT DATA - ادمین و کاربر تست
+        //  INIT DATA - ادمین و کاربر سفارشات
         // ============================================================
         function initData() {
             // ادمین اصلی - شماره 09109765104
@@ -4010,7 +4005,7 @@
                 setData('users', users);
             }
             
-            // کاربر سفارشات - شماره 09393527083 (فقط سفارشات)
+            // کاربر سفارشات - شماره 09393527083
             const orderUserExists = users.find(u => u.phone === '09393527083');
             if (!orderUserExists) {
                 users.push({
@@ -4021,7 +4016,6 @@
                     password: '12345678',
                     wallet_balance: 100000,
                     is_admin: false,
-                    is_order_manager: true,
                     created_at: new Date().toISOString()
                 });
                 setData('users', users);
@@ -4038,7 +4032,6 @@
                     password: '12345678',
                     wallet_balance: 100000,
                     is_admin: false,
-                    is_order_manager: false,
                     created_at: new Date().toISOString()
                 });
                 setData('users', users);
@@ -4093,7 +4086,6 @@
                 password,
                 wallet_balance: 10000,
                 is_admin: phone === '09109765104',
-                is_order_manager: phone === '09393527083',
                 created_at: new Date().toISOString()
             };
             users.push(user);
@@ -4750,6 +4742,34 @@
         }
 
         // ============================================================
+        //  UPDATE UI - نمایش دکمه مدیریت فقط برای ادمین
+        // ============================================================
+        function updateUI() {
+            if (currentUser) {
+                document.getElementById('authLink').style.display = 'none';
+                document.getElementById('heroAuthBtn').style.display = 'none';
+                document.getElementById('footerAuthLink').style.display = 'none';
+                document.getElementById('phoneFieldGroup').style.display = 'none';
+                
+                // ===== نمایش دکمه مدیریت فقط برای ادمین =====
+                if (currentUser.is_admin === true && currentUser.phone === '09109765104') {
+                    document.getElementById('adminNavBtn').style.display = 'flex';
+                } else {
+                    document.getElementById('adminNavBtn').style.display = 'none';
+                }
+            } else {
+                document.getElementById('authLink').style.display = 'flex';
+                document.getElementById('heroAuthBtn').style.display = 'flex';
+                document.getElementById('footerAuthLink').style.display = 'inline-block';
+                document.getElementById('phoneFieldGroup').style.display = 'block';
+                document.getElementById('adminNavBtn').style.display = 'none';
+            }
+            updateWalletUI();
+            updateAdminPanel();
+            renderServices();
+        }
+
+        // ============================================================
         //  UTILITY
         // ============================================================
         function formatPrice(price) {
@@ -4814,23 +4834,6 @@
             localStorage.removeItem('admin_logged_in');
             showToast('خروج از پنل مدیریت', 'info');
             navigateTo('home');
-        }
-
-        function updateUI() {
-            if (currentUser) {
-                document.getElementById('authLink').style.display = 'none';
-                document.getElementById('heroAuthBtn').style.display = 'none';
-                document.getElementById('footerAuthLink').style.display = 'none';
-                document.getElementById('phoneFieldGroup').style.display = 'none';
-            } else {
-                document.getElementById('authLink').style.display = 'flex';
-                document.getElementById('heroAuthBtn').style.display = 'flex';
-                document.getElementById('footerAuthLink').style.display = 'inline-block';
-                document.getElementById('phoneFieldGroup').style.display = 'block';
-            }
-            updateWalletUI();
-            updateAdminPanel();
-            renderServices();
         }
 
         // ============================================================
